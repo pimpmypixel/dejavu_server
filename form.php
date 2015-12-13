@@ -6,7 +6,7 @@ define('IMPORTSCRIPT', escapeshellcmd('/usr/bin/python /var/www/addremoveradmin/
 define('ADDSFOLDER', '/mnt/Beijing/AddRemoverFiles/Reklamer/');
 require_once 'lib/medoo.php';
 
-$db = json_decode(file_get_contents('python/database.json'),TRUE);
+$db = json_decode(file_get_contents('python/database.json'), TRUE);
 
 $database = new medoo([
 	'database_type' => 'mysql',
@@ -23,6 +23,7 @@ if ($_POST) {
 				"date" => time(),
 				"active" => $_POST['active'],
 			]);
+			$database->query("DELETE from configurations WHERE id IN(" . implode(',', array_values($_POST['del'])) . ")");
 			break;
 		case 'Import':
 			$database->insert("configurations", [
@@ -75,14 +76,36 @@ foreach ($channels as $channel) {
 			list-style: none;
 		}
 
+		li {
+			margin: 10px 0 0 0;
+		}
+
 		#form_container {
-			width: 15%;
+			width: 14%;
 			float: left;
 		}
 
-		#list {
-			width: 80%;
+		#list, #songs {
+			width: 85%;
 			float: right;
+			border: 1px solid grey;
+			overflow: auto;
+		}
+
+		#list {
+			height: 200px
+		}
+
+		#songs {
+			height: 400px
+		}
+
+		#list table tr {
+			cursor: default;
+		}
+
+		#list table tr.config:hover {
+			background-color: #EFEAE3;
 		}
 	</style>
 </head>
@@ -90,6 +113,12 @@ foreach ($channels as $channel) {
 <div id="form_container">
 	<form id="add" method="post" action="">
 		<ul>
+			<li id="li_0">
+
+				<div>
+					<a href="form.php">Refresh</a>
+				</div>
+			</li>
 			<li id="li_1">
 				<label class="description" for="element_1">Navn</label>
 
@@ -114,14 +143,6 @@ foreach ($channels as $channel) {
 						}
 						?>
 					</select>
-				</div>
-			</li>
-			<li id="li_2">
-				<label class="description" for="element_2">database name </label>
-
-				<div><!--
-					<input id="dbname" name="dbname" class="element text medium" type="text" maxlength="255"
-						   value=""/>-->
 				</div>
 			</li>
 			<li id="li_3">
@@ -210,7 +231,7 @@ foreach ($channels as $channel) {
 </div>
 <div id="list">
 	<form id="update" method="post" action="">
-		<table border="1">
+		<table border="0">
 			<tr>
 				<?php
 				foreach ($columns as $header) {
@@ -222,7 +243,7 @@ foreach ($channels as $channel) {
 				echo '</tr>';
 
 				foreach ($configs as $config) {
-					echo '<tr>';
+					echo '<tr class="config" id="' . $config['id'] . '">';
 					foreach ($config as $i => $col) {
 						$val = $col;
 						if ($i == 'date') {
@@ -234,6 +255,7 @@ foreach ($channels as $channel) {
 						echo '<td nowrap align=center>' . $val . '</td>' . PHP_EOL;
 					}
 					echo '<td><input name="active" value="' . $config['id'] . '" type="radio" ' . ($config['id'] == $active[0] ? 'checked' : '') . '></td>' . PHP_EOL;
+					echo '<td><input name="del[]" value="' . $config['id'] . '" type="checkbox"></td>' . PHP_EOL;
 					echo '</tr>' . PHP_EOL;
 				}
 				?>
@@ -248,5 +270,38 @@ foreach ($channels as $channel) {
 		</table>
 	</form>
 </div>
+<div id="songs">
+	<table border="1">
+
+	</table>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
+<script>
+	$(document).ready(function () {
+		$("#list tr").click(function () {
+			$("#songs table").empty();
+			$.getJSON('songs.php', {id: $(this).attr("id")}, function (data) {
+				if (data.songs != 'undefined') {
+					var st = '<tr>';
+					$.each(data.columns, function (i, o) {
+						st += '<th>' + o + '</th>';
+					});
+					st += '</tr>';
+
+					$.each(data.songs, function (i, o) {
+						st += '<tr>';
+						$.each(o, function (ii, oo) {
+							st += '<td>' + oo + '</td>';
+						});
+						st += '</tr>';
+					});
+
+					$("#songs table").append(st);
+				}
+			});
+		})
+	})
+</script>
 </body>
 </html>

@@ -1,15 +1,21 @@
-from dejavu.database import get_database, Database
-import dejavu.decoder as decoder
-import fingerprint
 import multiprocessing
 import os
 import traceback
+import json
 import sys
-import time
+import MySQLdb
+import MySQLdb.cursors
+
+from dejavu.database import get_database, Database
+import dejavu.decoder as decoder
+import fingerprint
+
+
+# assign database
+db = os.path.abspath("/var/www/addremoveradmin/python/database.json")
 
 
 class Dejavu(object):
-
     SONG_ID = "song_id"
     SONG_NAME = 'song_name'
     CONFIDENCE = 'confidence'
@@ -17,22 +23,31 @@ class Dejavu(object):
     OFFSET = 'offset'
     OFFSET_SECS = 'offset_seconds'
 
-    def __init__(self, config):
+    def __init__(self):
         super(Dejavu, self).__init__()
+        self.config = {}
+        with open(db) as f:
+            self.config['database'] = json.load(f)
+            con = MySQLdb.connect(self.config.get('database').get('host'), self.config.get('database').get('user'),
+                                  self.config.get('database').get('passwd'), self.config.get('database').get('db'),
+                                  cursorclass=MySQLdb.cursors.DictCursor)
+            cur = con.cursor()
+            # get latest configuration
+            # todo: get active configuration
+            cur.execute("SELECT * FROM `configurations` ORDER BY id DESC")
+            self.config['fingerprint'] = cur.fetchone()
 
-        self.config = config
+            # initialize db
+            db_cls = get_database(self.config.get("database_type", None))
+            self.db = db_cls(**self.config.get("database", {}))
+            self.db.setup(self.config)
 
-        # initialize db
-        db_cls = get_database(config.get("database_type", None))
-
-        self.db = db_cls(**config.get("database", {}))
-
-        # if we should limit seconds fingerprinted,
-        # None|-1 means use entire track
-        self.limit = self.config.get("fingerprint_limit", None)
-        if self.limit == -1:  # for JSON compatibility
-            self.limit = None
-        self.get_fingerprinted_songs()
+            # if we should limit seconds fingerprinted,
+            # None|-1 means use entire track
+            self.limit = self.config.get("fingerprint_limit", None)
+            if self.limit == -1:  # for JSON compatibility
+                self.limit = None
+            self.get_fingerprinted_songs()
 
     def get_fingerprinted_songs(self):
         # get songs previously indexed
@@ -56,7 +71,8 @@ class Dejavu(object):
         pool = multiprocessing.Pool(nprocesses)
 
         filenames_to_fingerprint = []
-        for filename, _ in decoder.find_files(self.config['fingerprint'].get('folder'), extensions):
+        print(self.config)
+        for filename, _ in decoder.find_files(self.config['fingerprint']['folder'], extensions):
 
             # don't refingerprint already fingerprinted files
             if decoder.unique_hash(filename) in self.songhashes_set:
@@ -76,7 +92,7 @@ class Dejavu(object):
         # Loop till we have all of them
         while True:
             try:
-                song_name, hashes, file_hash, cdate = iterator.next()
+                song_name, hashes, file_hash, cdate, duration = iterator.next()
             except multiprocessing.TimeoutError:
                 continue
             except StopIteration:
@@ -86,7 +102,7 @@ class Dejavu(object):
                 # Print traceback because we can't reraise it here
                 traceback.print_exc(file=sys.stdout)
             else:
-                sid = self.db.insert_song(song_name, file_hash, cdate, self.config['fingerprint']['id'])
+                sid = self.db.insert_song(song_name, file_hash, cdate, self.config['fingerprint']['id'], duration)
                 self.db.insert_hashes(sid, hashes)
                 self.db.set_song_fingerprinted(sid)
                 self.get_fingerprinted_songs()
@@ -99,8 +115,8 @@ class Dejavu(object):
         song_hash = decoder.unique_hash(filepath)
         song_name = song_name or songname
 
-        #filename, extension = os.path.splitext(os.path.basename(filepath))
-        #cdate = str(os.path.getctime(filename)).split('.')[0]
+        # filename, extension = os.path.splitext(os.path.basename(filepath))
+        # cdate = str(os.path.getctime(filename)).split('.')[0]
 
         # don't refingerprint already fingerprinted files
         if song_hash in self.songhashes_set:
@@ -111,10 +127,10 @@ class Dejavu(object):
                 self.limit,
                 song_name=song_name
             )
-            #sid = self.db.insert_song(song_name, file_hash)
+            # sid = self.db.insert_song(song_name, file_hash)
 
-            print(self.config['fingerprint']['id'])
-            print(cdate)
+            # print(self.config['fingerprint']['id'])
+            #print(cdate)
             #cdate = time.ctime(os.path.getctime(filepath))
             sid = self.db.insert_song(song_name, file_hash, cdate)
 
@@ -164,12 +180,12 @@ class Dejavu(object):
                          fingerprint.DEFAULT_WINDOW_SIZE *
                          fingerprint.DEFAULT_OVERLAP_RATIO, 5)
         song = {
-            Dejavu.SONG_ID : song_id,
-            Dejavu.SONG_NAME : songname,
-            Dejavu.CONFIDENCE : largest_count,
-            Dejavu.OFFSET : int(largest),
-            Dejavu.OFFSET_SECS : nseconds,
-            Database.FIELD_FILE_SHA1 : song.get(Database.FIELD_FILE_SHA1, None),}
+            Dejavu.SONG_ID: song_id,
+            Dejavu.SONG_NAME: songname,
+            Dejavu.CONFIDENCE: largest_count,
+            Dejavu.OFFSET: int(largest),
+            Dejavu.OFFSET_SECS: nseconds,
+            Database.FIELD_FILE_SHA1: song.get(Database.FIELD_FILE_SHA1, None), }
         return song
 
     def recognize(self, recognizer, *options, **kwoptions):
@@ -188,6 +204,14 @@ def _fingerprint_worker(filename, limit=None, song_name=None):
     songname, extension = os.path.splitext(os.path.basename(filename))
     cdate = str(os.path.getctime(filename)).split('.')[0]
 
+    # audio = MP3(filename)
+    # print(audio)
+    duration = 0
+    #    try:
+    #        duration = audio.info.length
+    #    except HeaderNotFoundError as err:
+    #        duration = 0
+
     song_name = song_name or songname
     channels, Fs, file_hash = decoder.read(filename, limit)
     result = set()
@@ -195,13 +219,12 @@ def _fingerprint_worker(filename, limit=None, song_name=None):
     file = str(songname + extension)
 
     for channeln, channel in enumerate(channels):
-        # TODO: Remove prints or change them into optional logging.
-        #print("Fingerprinting channel %d/%d for %s" % (channeln + 1, channel_amount, file))
+        # print("Fingerprinting channel %d/%d for %s" % (channeln + 1, channel_amount, file))
         hashes = fingerprint.fingerprint(channel, Fs=Fs)
-        print("Finished channel %d/%d for %s <br>" % (channeln + 1, channel_amount,file))
+        # print("Finished channel %d/%d for %s <br>" % (channeln + 1, channel_amount,file))
         result |= set(hashes)
 
-    return song_name, result, file_hash, cdate
+    return song_name, result, file_hash, cdate, duration
 
 
 def chunkify(lst, n):

@@ -9,59 +9,20 @@ import random
 from dejavu.database import Database
 
 
+def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
 class SQLDatabase(Database):
-    def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-        return ''.join(random.choice(chars) for _ in range(size))
-
-    """
-    Queries:
-
-    1) Find duplicates (shouldn't be any, though):
-
-        select `hash`, `song_id`, `offset`, count(*) cnt
-        from fingerprints
-        group by `hash`, `song_id`, `offset`
-        having cnt > 1
-        order by cnt asc;
-
-    2) Get number of hashes by song:
-
-        select song_id, song_name, count(song_id) as num
-        from fingerprints
-        natural join songs
-        group by song_id
-        order by count(song_id) desc;
-
-    3) get hashes with highest number of collisions
-
-        select
-            hash,
-            count(distinct song_id) as n
-        from fingerprints
-        group by `hash`
-        order by n DESC;
-
-    => 26 different songs with same fingerprint (392 times):
-
-        select songs.song_name, fingerprints.offset
-        from fingerprints natural join songs
-        where fingerprints.hash = "08d3c833b71c60a7b620322ac0c0aba7bf5a3e73";
-    """
-
     type = "mysql"
-
-
 
     # tables
     FINGERPRINTS_TABLENAME = 'FP_' + id_generator()
+
     SONGS_TABLENAME = "songs"
-
-
 
     # fields
     FIELD_FINGERPRINTED = "fingerprinted"
-
-
 
     # creates
     CREATE_FINGERPRINTS_TABLE = """
@@ -74,37 +35,47 @@ class SQLDatabase(Database):
          FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE
     ) ENGINE=INNODB;""" % (FINGERPRINTS_TABLENAME,
                            Database.FIELD_HASH,
-                           Database.FIELD_SONG_ID, Database.FIELD_OFFSET, Database.FIELD_HASH,
-                           Database.FIELD_SONG_ID, Database.FIELD_OFFSET, Database.FIELD_HASH,
-                           Database.FIELD_SONG_ID, SONGS_TABLENAME, Database.FIELD_SONG_ID
+                           Database.FIELD_SONG_ID,
+                           Database.FIELD_OFFSET,
+                           Database.FIELD_HASH,
+                           Database.FIELD_SONG_ID,
+                           Database.FIELD_OFFSET,
+                           Database.FIELD_HASH,
+                           Database.FIELD_SONG_ID,
+                           SONGS_TABLENAME,
+                           Database.FIELD_SONG_ID
     )
 
     CREATE_SONGS_TABLE = """
         CREATE TABLE IF NOT EXISTS `%s` (
             `%s` mediumint unsigned not null auto_increment,
-            `%s` varchar(250) not null,
+            `%s` varchar(250) CHARACTER SET utf8 COLLATE utf8_danish_ci not null,
             `%s` tinyint default 0,
             `%s` binary(20) not null,
             `%s` int(11) not null,
             `%s` int(5) not null,
+            `%s` varchar(25) not null,
         PRIMARY KEY (`%s`),
         UNIQUE KEY `%s` (`%s`)
-    ) ENGINE=INNODB;""" % (
+    ) ENGINE=INNODB CHARSET=utf8;""" % (
         SONGS_TABLENAME,
+
         Database.FIELD_SONG_ID,
         Database.FIELD_SONGNAME,
         FIELD_FINGERPRINTED,
         Database.FIELD_FILE_SHA1,
         Database.FIELD_CREATIONDDATE,
         Database.FIELD_CONFIGURATIONID,
-        Database.FIELD_SONG_ID, Database.FIELD_SONG_ID, Database.FIELD_SONG_ID,
+        Database.FIELD_DURATION,
+
+        Database.FIELD_SONG_ID,
+        Database.FIELD_SONG_ID,
+        Database.FIELD_SONG_ID,
     )
 
 
     # update config w/ fp table name
-    UPDATE_CONFIG = """
-        UPDATE `configurations` SET %s = %%s WHERE %s = %%s
-    """ % ('fp_table', 'id')
+    UPDATE_CONFIG = """UPDATE `configurations` SET %s = %%s WHERE %s = %%s""" % ('fp_table', 'id')
 
 
     # inserts (ignores duplicates)
@@ -113,9 +84,13 @@ class SQLDatabase(Database):
             (UNHEX(%%s), %%s, %%s);
     """ % (FINGERPRINTS_TABLENAME, Database.FIELD_HASH, Database.FIELD_SONG_ID, Database.FIELD_OFFSET)
 
-    INSERT_SONG = "INSERT INTO %s (%s, %s, %s ,%s) values (%%s, UNHEX(%%s), %%s, %%s);" % (
-        SONGS_TABLENAME, Database.FIELD_SONGNAME, Database.FIELD_FILE_SHA1, Database.FIELD_CREATIONDDATE,
-        Database.FIELD_CONFIGURATIONID)
+    INSERT_SONG = "INSERT INTO %s (%s, %s, %s ,%s ,%s) values (%%s, UNHEX(%%s), %%s, %%s, %%s);" % (
+        SONGS_TABLENAME,
+        Database.FIELD_SONGNAME,
+        Database.FIELD_FILE_SHA1,
+        Database.FIELD_CREATIONDDATE,
+        Database.FIELD_CONFIGURATIONID,
+        Database.FIELD_DURATION)
 
     # selects
     SELECT = """
@@ -163,11 +138,10 @@ class SQLDatabase(Database):
         DELETE FROM %s WHERE %s = 0;
     """ % (SONGS_TABLENAME, FIELD_FINGERPRINTED)
 
-    def __init__(self, fp=FINGERPRINTS_TABLENAME, **options):
+    def __init__(self, **options):
         super(SQLDatabase, self).__init__()
         self.cursor = cursor_factory(**options)
         self._options = options
-        self.fp = fp
 
     def after_fork(self):
         # Clear the cursor cache, we don't want any stale connections from
@@ -175,27 +149,18 @@ class SQLDatabase(Database):
         Cursor.clear_cache()
 
     def setup(self, config):
-        """
-        Creates any non-existing tables required for dejavu to function.
-
-        This also removes all songs that have been added but have no
-        fingerprints associated with them.
-        """
+        print "setup"
+        # print(self.FINGERPRINTS_TABLENAME)
+        #print(config)
         with self.cursor() as cur:
+            #print(self.CREATE_SONGS_TABLE)
             cur.execute(self.CREATE_SONGS_TABLE)
             cur.execute(self.CREATE_FINGERPRINTS_TABLE)
-            # cur.execute(self.CREATE_FINGERPRINTS_TABLE, (config['fingerprint']['id'], ))
             cur.execute(self.DELETE_UNFINGERPRINTED)
-            cur.execute(self.UPDATE_CONFIG, (self.fp, config['fingerprint']['id'],))
+            cur.execute(self.UPDATE_CONFIG, (self.FINGERPRINTS_TABLENAME, config['fingerprint']['id'],))
+            # print "setup done"
 
     def empty(self):
-        """
-        Drops tables created by dejavu and then creates them again
-        by calling `SQLDatabase.setup`.
-
-        .. warning:
-            This will result in a loss of data
-        """
         with self.cursor() as cur:
             cur.execute(self.DROP_FINGERPRINTS)
             cur.execute(self.DROP_SONGS)
@@ -203,16 +168,10 @@ class SQLDatabase(Database):
         self.setup()
 
     def delete_unfingerprinted_songs(self):
-        """
-        Removes all songs that have no fingerprints associated with them.
-        """
         with self.cursor() as cur:
             cur.execute(self.DELETE_UNFINGERPRINTED)
 
     def get_num_songs(self):
-        """
-        Returns number of songs the database has fingerprinted.
-        """
         with self.cursor() as cur:
             cur.execute(self.SELECT_UNIQUE_SONG_IDS)
 
@@ -263,12 +222,13 @@ class SQLDatabase(Database):
         with self.cursor() as cur:
             cur.execute(self.INSERT_FINGERPRINT, (hash, sid, offset))
 
-    def insert_song(self, songname, file_hash, cdate, configurationid):
+    def insert_song(self, songname, file_hash, cdate, configurationid, duration):
         """
         Inserts song in the database and returns the ID of the inserted record.
         """
+        print self.INSERT_SONG, (songname, file_hash, cdate, configurationid, duration)
         with self.cursor() as cur:
-            cur.execute(self.INSERT_SONG, (songname, file_hash, cdate, configurationid))
+            cur.execute(self.INSERT_SONG, (songname, file_hash, cdate, configurationid, duration))
             return cur.lastrowid
 
     def query(self, hash):

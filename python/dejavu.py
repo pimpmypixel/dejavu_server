@@ -2,33 +2,20 @@
 
 import os
 import sys
-import json
 import warnings
 import argparse
+from argparse import RawTextHelpFormatter
 
 from dejavu import Dejavu
 from dejavu.recognize import FileRecognizer
 from dejavu.recognize import MicrophoneRecognizer
-from argparse import RawTextHelpFormatter
+
 
 warnings.filterwarnings("ignore")
 
-DEFAULT_CONFIG_FILE = "ddb231015.cnf"
 
-
-def init(configpath):
-    """ 
-    Load config from a JSON file
-    """
-    try:
-        with open(configpath) as f:
-            config = json.load(f)
-    except IOError as err:
-        print("Cannot open configuration: %s. Exiting" % (str(err)))
-        sys.exit(1)
-
-    # create a Dejavu instance
-    return Dejavu(config)
+def init():
+    return Dejavu()
 
 
 if __name__ == '__main__':
@@ -56,12 +43,8 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit(0)
 
-    config_file = args.config
-    if config_file is None:
-        config_file = DEFAULT_CONFIG_FILE
-        # print "Using default config file: %s" % (config_file)
+    djv = init()
 
-    djv = init(config_file)
     if args.fingerprint:
         # Fingerprint all files in a directory
         if len(args.fingerprint) == 2:

@@ -86,6 +86,7 @@ def generate_test_files(src, dest, nseconds, fmts=[".mp3", ".wav"], padding=10):
                 nseconds, extension.replace(".", ""))
             
             subprocess.check_output([
+            #subprocess.check_call([
                 "ffmpeg", "-y",
                 "-ss", "%d" % starttime, 
                 '-t' , "%d" % nseconds, 

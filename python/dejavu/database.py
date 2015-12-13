@@ -12,6 +12,7 @@ class Database(object):
     FIELD_HASH = 'hash'
     FIELD_CREATIONDDATE = 'filecrdate'
     FIELD_CONFIGURATIONID = 'configuration'
+    FIELD_DURATION = 'duration'
 
     # Name of your Database subclass, this is used in configuration
     # to refer to your class
@@ -162,11 +163,8 @@ class Database(object):
 
 
 def get_database(database_type=None):
-    # Default to using the mysql database
     database_type = database_type or "mysql"
-    # Lower all the input.
     database_type = database_type.lower()
-
     for db_cls in Database.__subclasses__():
         if db_cls.type == database_type:
             return db_cls
