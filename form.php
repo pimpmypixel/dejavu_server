@@ -6,12 +6,14 @@ define('IMPORTSCRIPT', escapeshellcmd('/usr/bin/python /var/www/addremoveradmin/
 define('ADDSFOLDER', '/mnt/Beijing/AddRemoverFiles/Reklamer/');
 require_once 'lib/medoo.php';
 
+$db = json_decode(file_get_contents('python/database.json'));
+
 $database = new medoo([
 	'database_type' => 'mysql',
-	'database_name' => 'admin',
+	'database_name' => $db['db'],
 	'server' => 'localhost',
-	'username' => 'root',
-	'password' => 'lsd4you',
+	'username' => $db['user'],
+	'password' => $db['passwd'],
 	'charset' => 'utf8'
 ]);
 if ($_POST) {
