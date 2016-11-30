@@ -1,113 +1,13 @@
 <?php
-
-ini_set('display_errors', 1);
-error_reporting(E_ERROR);
-define('IMPORTSCRIPT', escapeshellcmd('/usr/bin/python /var/www/addremoveradmin/python/importAdds.py'));
-define('ADDSFOLDER', '/mnt/Beijing/AddRemoverFiles/Reklamer/');
-require_once 'lib/medoo.php';
-
-$db = json_decode(file_get_contents('python/database.json'), TRUE);
-
-$database = new medoo([
-	'database_type' => 'mysql',
-	'database_name' => $db['db'],
-	'server' => 'localhost',
-	'username' => $db['user'],
-	'password' => $db['passwd'],
-	'charset' => 'utf8'
-]);
-if ($_POST) {
-	switch ($_POST['submit']) {
-		case 'Update':
-			$database->insert("states", [
-				"date" => time(),
-				"active" => $_POST['active'],
-			]);
-			$database->query("DELETE from configurations WHERE id IN(" . implode(',', array_values($_POST['del'])) . ")");
-			break;
-		case 'Import':
-			$database->insert("configurations", [
-				"name" => $_POST['name'],
-				"date" => time(),
-				"folder" => $_POST['folder'],
-				"samplerate" => $_POST['samplerate'],
-				"window_size" => $_POST['window_size'],
-				"overlap_ratio" => $_POST['overlap_ratio'],
-				"fan_value" => $_POST['fan_value'],
-				"neighborhood_size" => $_POST['neighborhood_size'],
-				"min_hash" => $_POST['min_hash'],
-				"max_hash" => $_POST['max_hash'],
-				"fingerprint_redux" => $_POST['fingerprint_redux']
-			]);
-
-			$output = shell_exec(IMPORTSCRIPT);
-			break;
-	}
-}
-
-$columns = $database->query("DESCRIBE configurations")->fetchAll();
-$active = $database->query("SELECT active FROM states ORDER BY id DESC")->fetch();
-$configs = $database->select("configurations", "*");
-
-$channels = glob(ADDSFOLDER . '*');
-foreach ($channels as $channel) {
-	$dates = glob($channel . '/*', GLOB_ONLYDIR);
-	$channel = end(explode("/", $channel));
-	foreach ($dates as $period) {
-		$c[$channel][] = $period;
-	}
-}
+include('lib/form.php');
 ?><!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<title>Untitled Form</title>
-	<style>
-		body {
-
-			font-size: 12px;
-		}
-
-		label {
-			text-transform: capitalize;
-		}
-
-		ul {
-			list-style: none;
-		}
-
-		li {
-			margin: 10px 0 0 0;
-		}
-
-		#form_container {
-			width: 14%;
-			float: left;
-		}
-
-		#list, #songs {
-			width: 85%;
-			float: right;
-			border: 1px solid grey;
-			overflow: auto;
-		}
-
-		#list {
-			height: 200px
-		}
-
-		#songs {
-			height: 400px
-		}
-
-		#list table tr {
-			cursor: default;
-		}
-
-		#list table tr.config:hover {
-			background-color: #EFEAE3;
-		}
-	</style>
+	<title>Commercials DB Admin</title>
+	<link rel="stylesheet" type="text/css" href="lib/style.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
+	<script src="lib/js.js"></script>
 </head>
 <body id="main_body">
 <div id="form_container">
@@ -271,37 +171,7 @@ foreach ($channels as $channel) {
 	</form>
 </div>
 <div id="songs">
-	<table border="1">
-
-	</table>
+	<table border="0" cellpadding="5"></table>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
-<script>
-	$(document).ready(function () {
-		$("#list tr").click(function () {
-			$("#songs table").empty();
-			$.getJSON('songs.php', {id: $(this).attr("id")}, function (data) {
-				if (data.songs != 'undefined') {
-					var st = '<tr>';
-					$.each(data.columns, function (i, o) {
-						st += '<th>' + o + '</th>';
-					});
-					st += '</tr>';
-
-					$.each(data.songs, function (i, o) {
-						st += '<tr>';
-						$.each(o, function (ii, oo) {
-							st += '<td>' + oo + '</td>';
-						});
-						st += '</tr>';
-					});
-
-					$("#songs table").append(st);
-				}
-			});
-		})
-	})
-</script>
 </body>
 </html>

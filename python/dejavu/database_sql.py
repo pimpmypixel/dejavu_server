@@ -149,7 +149,6 @@ class SQLDatabase(Database):
         Cursor.clear_cache()
 
     def setup(self, config):
-        print "setup"
         # print(self.FINGERPRINTS_TABLENAME)
         #print(config)
         with self.cursor() as cur:

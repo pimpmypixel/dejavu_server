@@ -40,7 +40,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not args.fingerprint and not args.recognize:
-        parser.print_help()
+        #parser.print_help()
         sys.exit(0)
 
     djv = init()

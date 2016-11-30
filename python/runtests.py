@@ -6,7 +6,7 @@ import time
 import shutil
 
 from dejavu.testing import *
-from dejavu import Dejavu as DejavuTest
+from dejavu import Dejavu
 
 
 usage = "usage: %prog [options] TESTING_AUDIOFOLDER"
@@ -86,6 +86,7 @@ log_msg("Running Dejavu fingerprinter on files in %s..." % test_folder,
 
 tm = time.time()
 djv = DejavuTest(options.temp_folder, test_seconds)
+
 log_msg("finished obtaining results from dejavu in %s" % (time.time() - tm),
         log=options.log, silent=options.silent)
 
@@ -191,4 +192,4 @@ for sec in range(0, n_secs):
     fig.savefig(fig_name)
 
 # remove temporary folder
-shutil.rmtree(options.temp_folder)
+#shutil.rmtree(options.temp_folder)

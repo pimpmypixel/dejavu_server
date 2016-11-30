@@ -1,0 +1,40 @@
+DEBUG:root:Running Dejavu fingerprinter on files in /mnt/Beijing/AddRemoverFiles/Reklamer/tv2/single/...
+DEBUG:root:Running Dejavu fingerprinter on files in /mnt/Beijing/AddRemoverFiles/Reklamer/tv2/single/...
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmptZy2Qi', '-vn', '-f', 'wav', '/tmp/tmpiba0zM'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpZ3Ek7x', '-vn', '-f', 'wav', '/tmp/tmpcRKk2W'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpwDrKyk', '-vn', '-f', 'wav', '/tmp/tmp86UR3J'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpud4MHV', '-vn', '-f', 'wav', '/tmp/tmpTcUJMm'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmp3XWLOS', '-vn', '-f', 'wav', '/tmp/tmpJj7JjY'])
+DEBUG:root:Running Dejavu fingerprinter on files in /mnt/Beijing/AddRemoverFiles/Reklamer/tv2/single/...
+DEBUG:root:--------------------------------------------------
+DEBUG:root:file: skousen_8_3sec.mp3
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpSNnvqC', '-vn', '-f', 'wav', '/tmp/tmpuuJ9hg'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpqSATEv', '-vn', '-f', 'wav', '/tmp/tmp9Mn1db'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpascMAQ', '-vn', '-f', 'wav', '/tmp/tmpOeFcWB'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmp6w2_1d', '-vn', '-f', 'wav', '/tmp/tmpBghGQ3'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpqc6Zj5', '-vn', '-f', 'wav', '/tmp/tmpadMVw7'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmppWOn1o', '-vn', '-f', 'wav', '/tmp/tmp2yWQBj'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpinRRrJ', '-vn', '-f', 'wav', '/tmp/tmp33m4vS'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpxbedPk', '-vn', '-f', 'wav', '/tmp/tmpp8YByd'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmp16i2nY', '-vn', '-f', 'wav', '/tmp/tmpyWzlIV'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmp__9khk', '-vn', '-f', 'wav', '/tmp/tmpeKmHGn'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmp_m6OJF', '-vn', '-f', 'wav', '/tmp/tmpVfgorG'])
+DEBUG:root:Running Dejavu fingerprinter on files in /mnt/Beijing/AddRemoverFiles/Reklamer/tv2/single/...
+DEBUG:root:--------------------------------------------------
+DEBUG:root:file: skousen_8_3sec.mp3
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpjHhGxM', '-vn', '-f', 'wav', '/tmp/tmp8cPhii'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpMcFou5', '-vn', '-f', 'wav', '/tmp/tmpgMN5fJ'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmppW42tI', '-vn', '-f', 'wav', '/tmp/tmpJDyQBZ'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpDdAVgZ', '-vn', '-f', 'wav', '/tmp/tmpinj5Ha'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpfn36RY', '-vn', '-f', 'wav', '/tmp/tmpqn9ZGG'])
+DEBUG:root:Running Dejavu fingerprinter on files in /mnt/Beijing/AddRemoverFiles/Reklamer/tv2/single/...
+DEBUG:root:--------------------------------------------------
+DEBUG:root:file: skousen_8_3sec.mp3
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmphfk3Mj', '-vn', '-f', 'wav', '/tmp/tmpz1p37M'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpQbdkuy', '-vn', '-f', 'wav', '/tmp/tmp9dLdgt'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpH0TqWP', '-vn', '-f', 'wav', '/tmp/tmpmncPvo'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmprWq7hP', '-vn', '-f', 'wav', '/tmp/tmpwh8zm1'])
+DEBUG:pydub.converter:subprocess.call(['ffmpeg', '-y', '-f', 'mp3', '-i', '/tmp/tmpRULCf1', '-vn', '-f', 'wav', '/tmp/tmp0w8P4V'])
+DEBUG:root:Running Dejavu fingerprinter on files in /mnt/Beijing/AddRemoverFiles/Reklamer/tv2/single/...
+DEBUG:root:--------------------------------------------------
+DEBUG:root:file: skousen_8_3sec.mp3

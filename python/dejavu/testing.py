@@ -234,6 +234,7 @@ class DejavuTest(object):
                 result = result.replace("\',", '",')
 
                 # which song did we predict?
+                print result
                 result = ast.literal_eval(result)
                 song_result = result["song_name"]
                 log_msg('song: %s' % song)

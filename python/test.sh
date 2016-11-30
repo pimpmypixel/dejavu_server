@@ -2,10 +2,10 @@
 folder="/mnt/Beijing/AddRemoverFiles/Reklamer/tv2/single/"
 
 echo "cleaning up"
-rm -rf ./results ./temp_audio ./dejavu_test_results ./results-compare.log
+#rm -rf ./results ./temp_audio ./dejavu_test_results ./results-compare.log
 
-echo "fingerprinting"
-python dejavu.py -f $folder mp3
+#echo "fingerprinting"
+python dejavu.py
 
 echo "running test:"
 python runtests.py \

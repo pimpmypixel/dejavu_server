@@ -27,6 +27,7 @@ $table = $database->select("configurations", "fp_table", ['id' => $_GET['id']])[
 $songs = $database->select("songs", "*", ['configuration' => $_GET['id']]);
 foreach ($songs as $track) {
 	$hashes = $database->count($table, ['song_id' => $track['song_id']]);
+	$hashesperduration =  $track['duration'] ? round($hashes / $track['duration']) : '-';
 	$out['songs'][] = array(
 		(int)$track['song_id'],
 		$track['song_name'],
@@ -34,8 +35,7 @@ foreach ($songs as $track) {
 		date('d/m Y', $track['filecrdate']),
 		(int)$track['duration'],
 		$hashes,
-		round($hashes / $track['duration']
-		)
+		$hashesperduration
 	);
 }
 echo json_encode($out,JSON_UNESCAPED_UNICODE);

@@ -1,4 +1,5 @@
 import multiprocessing
+from pydub import AudioSegment
 import os
 import traceback
 import json
@@ -71,7 +72,6 @@ class Dejavu(object):
         pool = multiprocessing.Pool(nprocesses)
 
         filenames_to_fingerprint = []
-        print(self.config)
         for filename, _ in decoder.find_files(self.config['fingerprint']['folder'], extensions):
 
             # don't refingerprint already fingerprinted files
@@ -203,14 +203,7 @@ def _fingerprint_worker(filename, limit=None, song_name=None):
 
     songname, extension = os.path.splitext(os.path.basename(filename))
     cdate = str(os.path.getctime(filename)).split('.')[0]
-
-    # audio = MP3(filename)
-    # print(audio)
-    duration = 0
-    #    try:
-    #        duration = audio.info.length
-    #    except HeaderNotFoundError as err:
-    #        duration = 0
+    duration = get_length_audio(filename, extension)
 
     song_name = song_name or songname
     channels, Fs, file_hash = decoder.read(filename, limit)
@@ -233,3 +226,16 @@ def chunkify(lst, n):
     http://stackoverflow.com/questions/2130016/splitting-a-list-of-arbitrary-size-into-only-roughly-n-equal-parts
     """
     return [lst[i::n] for i in xrange(n)]
+
+
+def get_length_audio(audiopath, extension):
+    """
+    Returns length of audio in seconds.
+    Returns None if format isn't supported or in case of error.
+    """
+    try:
+        audio = AudioSegment.from_file(audiopath, extension.replace(".", ""))
+    except:
+        print "Error in get_length_audio(): %s" % traceback.format_exc()
+        return None
+    return int(len(audio) / 1000.0)
