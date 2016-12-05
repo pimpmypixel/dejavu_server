@@ -27,3 +27,10 @@ CREATE TABLE `states` (
 )
   ENGINE =InnoDB
   DEFAULT CHARSET =latin1;
+
+  CREATE TABLE `uploads` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `date` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `file` varchar(255) COLLATE latin1_danish_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_danish_ci;

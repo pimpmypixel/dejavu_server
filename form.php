@@ -1,17 +1,41 @@
 <?php
-include('lib/form.php');
+require_once 'lib/medoo.php';
+define('ADDSFOLDER', '/mnt/Beijing/AddRemoverFiles/Reklamer/');
+$db = json_decode(file_get_contents('lib/database.json'), TRUE);
+
+$database = new medoo([
+	'database_type' => 'mysql',
+	'database_name' => $db['db'],
+	'server' => 'localhost',
+	'username' => $db['user'],
+	'password' => $db['passwd'],
+	'charset' => 'utf8'
+]);
+
+$columns = $database->query("DESCRIBE configurations")->fetchAll();
+$active = $database->query("SELECT active FROM states ORDER BY id DESC")->fetch();
+$configs = $database->select("configurations", "*");
+
+$channels = glob(ADDSFOLDER . '*');
+foreach ($channels as $channel) {
+	$dates = glob($channel . '/*', GLOB_ONLYDIR);
+	$channel = end(explode("/", $channel));
+	foreach ($dates as $period) {
+		$c[$channel][] = $period;
+	}
+}
+
 ?><!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>Commercials DB Admin</title>
 	<link rel="stylesheet" type="text/css" href="lib/style.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.js"></script>
+	<script src="lib/jquery.js"></script>
 	<script src="lib/js.js"></script>
 </head>
 <body id="main_body">
 <div id="form_container">
-	<form id="add" method="post" action="">
 		<ul>
 			<li id="li_0">
 
@@ -33,15 +57,6 @@ include('lib/form.php');
 				<div>
 					<select class="element select medium" id="folder" name="folder">
 						<option value="" selected="selected"></option>
-						<?php
-						foreach ($c as $channel => $periods) {
-							echo '<optgroup label="' . $channel . '">' . PHP_EOL;
-							foreach ($periods as $period) {
-								echo '<option value="' . $period . '">' . end(explode("/", $period)) . '</option>' . PHP_EOL;
-							}
-							echo '</optgroup>';
-						}
-						?>
 					</select>
 				</div>
 			</li>
@@ -124,13 +139,11 @@ include('lib/form.php');
 				</div>
 			</li>
 			<li class="buttons">
-				<input id="saveForm" class="button_text" type="submit" name="submit" value="Import"/>
+				<button id="saveForm" onclick="javascript:void(0)" class="button_text">Import</button>
 			</li>
 		</ul>
-	</form>
 </div>
 <div id="list">
-	<form id="update" method="post" action="">
 		<table border="0">
 			<tr>
 				<?php
@@ -155,7 +168,7 @@ include('lib/form.php');
 						echo '<td nowrap align=center>' . $val . '</td>' . PHP_EOL;
 					}
 					echo '<td><input name="active" value="' . $config['id'] . '" type="radio" ' . ($config['id'] == $active[0] ? 'checked' : '') . '></td>' . PHP_EOL;
-					echo '<td><input name="del[]" value="' . $config['id'] . '" type="checkbox"></td>' . PHP_EOL;
+					echo '<td class="del"><input class="delbox" name="del[]" value="' . $config['id'] . '" type="checkbox"></td>' . PHP_EOL;
 					echo '</tr>' . PHP_EOL;
 				}
 				?>
@@ -163,12 +176,13 @@ include('lib/form.php');
 			<tr>
 				<td colspan="13" style="text-align: right">
 					<input class="button_text" type="submit" name="submit" value="Update"/></td>
+				<td colspan="2" style="text-align: right">
+					<button class="button_text" id="delete" onClick="javascript:void(0)">X</button></td>
 			</tr>
 			<tr>
-				<td colspan="13"><?= $output ?></td>
+				<td colspan="15"><?= $output ?></td>
 			</tr>
 		</table>
-	</form>
 </div>
 <div id="songs">
 	<table border="0" cellpadding="5"></table>

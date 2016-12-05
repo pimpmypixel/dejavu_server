@@ -45,33 +45,33 @@ class SQLDatabase(Database):
                            SONGS_TABLENAME,
                            Database.FIELD_SONG_ID
     )
-
-    CREATE_SONGS_TABLE = """
-        CREATE TABLE IF NOT EXISTS `%s` (
-            `%s` mediumint unsigned not null auto_increment,
-            `%s` varchar(250) CHARACTER SET utf8 COLLATE utf8_danish_ci not null,
-            `%s` tinyint default 0,
-            `%s` binary(20) not null,
-            `%s` int(11) not null,
-            `%s` int(5) not null,
-            `%s` varchar(25) not null,
-        PRIMARY KEY (`%s`),
-        UNIQUE KEY `%s` (`%s`)
-    ) ENGINE=INNODB CHARSET=utf8;""" % (
-        SONGS_TABLENAME,
-
-        Database.FIELD_SONG_ID,
-        Database.FIELD_SONGNAME,
-        FIELD_FINGERPRINTED,
-        Database.FIELD_FILE_SHA1,
-        Database.FIELD_CREATIONDDATE,
-        Database.FIELD_CONFIGURATIONID,
-        Database.FIELD_DURATION,
-
-        Database.FIELD_SONG_ID,
-        Database.FIELD_SONG_ID,
-        Database.FIELD_SONG_ID,
-    )
+    #
+    # CREATE_SONGS_TABLE = """
+    #     CREATE TABLE IF NOT EXISTS `%s` (
+    #         `%s` mediumint unsigned not null auto_increment,
+    #         `%s` varchar(250) CHARACTER SET utf8 COLLATE utf8_danish_ci not null,
+    #         `%s` tinyint default 0,
+    #         `%s` binary(20) not null,
+    #         `%s` int(11) not null,
+    #         `%s` int(5) not null,
+    #         `%s` varchar(25) not null,
+    #     PRIMARY KEY (`%s`),
+    #     UNIQUE KEY `%s` (`%s`)
+    # ) ENGINE=INNODB CHARSET=utf8;""" % (
+    #     SONGS_TABLENAME,
+    #
+    #     Database.FIELD_SONG_ID,
+    #     Database.FIELD_SONGNAME,
+    #     FIELD_FINGERPRINTED,
+    #     Database.FIELD_FILE_SHA1,
+    #     Database.FIELD_CREATIONDDATE,
+    #     Database.FIELD_CONFIGURATIONID,
+    #     Database.FIELD_DURATION,
+    #
+    #     Database.FIELD_SONG_ID,
+    #     Database.FIELD_SONG_ID,
+    #     Database.FIELD_SONG_ID,
+    # )
 
 
     # update config w/ fp table name
@@ -153,7 +153,7 @@ class SQLDatabase(Database):
         #print(config)
         with self.cursor() as cur:
             #print(self.CREATE_SONGS_TABLE)
-            cur.execute(self.CREATE_SONGS_TABLE)
+            #cur.execute(self.CREATE_SONGS_TABLE)
             cur.execute(self.CREATE_FINGERPRINTS_TABLE)
             cur.execute(self.DELETE_UNFINGERPRINTED)
             cur.execute(self.UPDATE_CONFIG, (self.FINGERPRINTS_TABLENAME, config['fingerprint']['id'],))

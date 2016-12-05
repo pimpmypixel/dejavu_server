@@ -13,7 +13,7 @@ import fingerprint
 
 
 # assign database
-db = os.path.abspath("/var/www/addremoveradmin/python/database.json")
+db = os.path.abspath("/var/www/adkiller/admin/lib/database.json")
 
 
 class Dejavu(object):
@@ -61,7 +61,6 @@ class Dejavu(object):
     def fingerprint_directory(self, nprocesses=None):
         extensions = [".mp3"]
         # Try to use the maximum amount of processes if not given.
-
         try:
             nprocesses = nprocesses or multiprocessing.cpu_count()
         except NotImplementedError:
@@ -76,7 +75,7 @@ class Dejavu(object):
 
             # don't refingerprint already fingerprinted files
             if decoder.unique_hash(filename) in self.songhashes_set:
-                print "%s already fingerprinted, continuing..." % filename
+                print "%s already fingerprinted, continuing...<br>" % filename
                 continue
 
             filenames_to_fingerprint.append(filename)
@@ -86,8 +85,7 @@ class Dejavu(object):
                            [self.limit] * len(filenames_to_fingerprint))
 
         # Send off our tasks
-        iterator = pool.imap_unordered(_fingerprint_worker,
-                                       worker_input)
+        iterator = pool.imap_unordered(_fingerprint_worker,worker_input)
 
         # Loop till we have all of them
         while True:
@@ -115,25 +113,21 @@ class Dejavu(object):
         song_hash = decoder.unique_hash(filepath)
         song_name = song_name or songname
 
-        # filename, extension = os.path.splitext(os.path.basename(filepath))
-        # cdate = str(os.path.getctime(filename)).split('.')[0]
+        filename, extension = os.path.splitext(os.path.basename(filepath))
+        #cdate = str(os.path.getctime(filename)).split('.')[0]
+#        print os.path.splitext(os.path.basename(filepath))
 
         # don't refingerprint already fingerprinted files
         if song_hash in self.songhashes_set:
-            print "%s already fingerprinted, continuing..." % song_name
+            print "%s already fingerprinted, continuing...<br>" % song_name
         else:
-            song_name, hashes, file_hash, cdate = _fingerprint_worker(
-                filepath,
-                self.limit,
-                song_name=song_name
-            )
+            song_name, hashes, file_hash, cdate, duration = _fingerprint_worker(filepath,self.limit)#,song_name=song_name)
             # sid = self.db.insert_song(song_name, file_hash)
-
             # print(self.config['fingerprint']['id'])
             #print(cdate)
             #cdate = time.ctime(os.path.getctime(filepath))
-            sid = self.db.insert_song(song_name, file_hash, cdate)
-
+            sid = self.db.insert_song(song_name, file_hash, cdate, self.config['fingerprint']['id'], duration)
+#      	    print "fingerprinted %s<br>" % sid
             self.db.insert_hashes(sid, hashes)
             self.db.set_song_fingerprinted(sid)
             self.get_fingerprinted_songs()
@@ -219,14 +213,12 @@ def _fingerprint_worker(filename, limit=None, song_name=None):
 
     return song_name, result, file_hash, cdate, duration
 
-
 def chunkify(lst, n):
     """
     Splits a list into roughly n equal parts.
     http://stackoverflow.com/questions/2130016/splitting-a-list-of-arbitrary-size-into-only-roughly-n-equal-parts
     """
     return [lst[i::n] for i in xrange(n)]
-
 
 def get_length_audio(audiopath, extension):
     """
