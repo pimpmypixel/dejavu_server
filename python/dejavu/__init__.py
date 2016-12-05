@@ -10,11 +10,7 @@ import MySQLdb.cursors
 from dejavu.database import get_database, Database
 import dejavu.decoder as decoder
 import fingerprint
-
-
-# assign database
 db = os.path.abspath("/var/www/adkiller/admin/lib/database.json")
-
 
 class Dejavu(object):
     SONG_ID = "song_id"
@@ -67,9 +63,7 @@ class Dejavu(object):
             nprocesses = 1
         else:
             nprocesses = 1 if nprocesses <= 0 else nprocesses
-
         pool = multiprocessing.Pool(nprocesses)
-
         filenames_to_fingerprint = []
         for filename, _ in decoder.find_files(self.config['fingerprint']['folder'], extensions):
 
@@ -83,10 +77,8 @@ class Dejavu(object):
         # Prepare _fingerprint_worker input
         worker_input = zip(filenames_to_fingerprint,
                            [self.limit] * len(filenames_to_fingerprint))
-
         # Send off our tasks
         iterator = pool.imap_unordered(_fingerprint_worker,worker_input)
-
         # Loop till we have all of them
         while True:
             try:
@@ -104,7 +96,6 @@ class Dejavu(object):
                 self.db.insert_hashes(sid, hashes)
                 self.db.set_song_fingerprinted(sid)
                 self.get_fingerprinted_songs()
-
         pool.close()
         pool.join()
 
