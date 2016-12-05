@@ -5,7 +5,6 @@ import MySQLdb as mysql
 from MySQLdb.cursors import DictCursor
 import string
 import random
-
 from dejavu.database import Database
 
 
@@ -15,13 +14,9 @@ def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
 
 class SQLDatabase(Database):
     type = "mysql"
-
-    # tables
-    FINGERPRINTS_TABLENAME = 'FP_' + id_generator()
-
+    #FINGERPRINTS_TABLENAME = 'FP_' + id_generator()
+    FINGERPRINTS_TABLENAME = 'fingerprints'
     SONGS_TABLENAME = "songs"
-
-    # fields
     FIELD_FINGERPRINTED = "fingerprinted"
 
     # creates
@@ -77,11 +72,9 @@ class SQLDatabase(Database):
     # update config w/ fp table name
     UPDATE_CONFIG = """UPDATE `configurations` SET %s = %%s WHERE %s = %%s""" % ('fp_table', 'id')
 
-
     # inserts (ignores duplicates)
     INSERT_FINGERPRINT = """
-        INSERT IGNORE INTO %s (%s, %s, %s) values
-            (UNHEX(%%s), %%s, %%s);
+        INSERT IGNORE INTO %s (%s, %s, %s) values (UNHEX(%%s), %%s, %%s);
     """ % (FINGERPRINTS_TABLENAME, Database.FIELD_HASH, Database.FIELD_SONG_ID, Database.FIELD_OFFSET)
 
     INSERT_SONG = "INSERT INTO %s (%s, %s, %s ,%s ,%s) values (%%s, UNHEX(%%s), %%s, %%s, %%s);" % (
@@ -149,7 +142,7 @@ class SQLDatabase(Database):
         Cursor.clear_cache()
 
     def setup(self, config):
-        # print(self.FINGERPRINTS_TABLENAME)
+        #print(self.FINGERPRINTS_TABLENAME)
         #print(config)
         with self.cursor() as cur:
             #print(self.CREATE_SONGS_TABLE)
@@ -157,7 +150,7 @@ class SQLDatabase(Database):
             cur.execute(self.CREATE_FINGERPRINTS_TABLE)
             cur.execute(self.DELETE_UNFINGERPRINTED)
             cur.execute(self.UPDATE_CONFIG, (self.FINGERPRINTS_TABLENAME, config['fingerprint']['id'],))
-            # print "setup done"
+            #print "setup done"
 
     def empty(self):
         with self.cursor() as cur:

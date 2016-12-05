@@ -34,3 +34,13 @@ CREATE TABLE `states` (
   `file` varchar(255) COLLATE latin1_danish_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_danish_ci;
+
+
+CREATE TABLE IF NOT EXISTS `fingerprints` (
+         `hash` binary(10) not null,
+         `song_id` mediumint unsigned not null,
+         `offset` int unsigned not null,
+     INDEX (`hash`),
+     UNIQUE KEY `unique_constraint` (`song_id`,`offset`,`hash`),
+     FOREIGN KEY (`song_id`) REFERENCES `songs`(`song_id`) ON DELETE CASCADE
+) ENGINE=INNODB;

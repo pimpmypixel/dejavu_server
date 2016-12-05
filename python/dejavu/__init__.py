@@ -103,25 +103,17 @@ class Dejavu(object):
         songname = decoder.path_to_songname(filepath)
         song_hash = decoder.unique_hash(filepath)
         song_name = song_name or songname
-
         filename, extension = os.path.splitext(os.path.basename(filepath))
-        #cdate = str(os.path.getctime(filename)).split('.')[0]
-#        print os.path.splitext(os.path.basename(filepath))
-
-        # don't refingerprint already fingerprinted files
         if song_hash in self.songhashes_set:
             print "%s already fingerprinted, continuing...<br>" % song_name
         else:
-            song_name, hashes, file_hash, cdate, duration = _fingerprint_worker(filepath,self.limit)#,song_name=song_name)
-            # sid = self.db.insert_song(song_name, file_hash)
-            # print(self.config['fingerprint']['id'])
-            #print(cdate)
-            #cdate = time.ctime(os.path.getctime(filepath))
+            song_name, hashes, file_hash, cdate, duration = _fingerprint_worker(filepath,self.limit)
             sid = self.db.insert_song(song_name, file_hash, cdate, self.config['fingerprint']['id'], duration)
-#      	    print "fingerprinted %s<br>" % sid
             self.db.insert_hashes(sid, hashes)
             self.db.set_song_fingerprinted(sid)
             self.get_fingerprinted_songs()
+            print "hashing complete"
+            #print "%s fingerprinted<br>" % song_name
 
     def find_matches(self, samples, Fs=fingerprint.DEFAULT_FS):
         hashes = fingerprint.fingerprint(samples, Fs=Fs)
