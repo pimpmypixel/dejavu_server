@@ -187,5 +187,8 @@ foreach ($channels as $channel) {
 <div id="songs">
 	<table border="0" cellpadding="5"></table>
 </div>
+<div id="sessions">
+	<table border="0" cellpadding="5"></table>
+</div>
 </body>
 </html>

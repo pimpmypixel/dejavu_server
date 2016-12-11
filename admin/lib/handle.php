@@ -20,6 +20,7 @@ $database = new medoo([
 
 
 switch ($_GET['action']) {
+
 	case 'add':
 		$_POST = $_POST['add'];
 		$database->insert("configurations", [
@@ -35,16 +36,9 @@ switch ($_GET['action']) {
 			"max_hash" => $_POST['max_hash'],
 			"fingerprint_redux" => $_POST['fingerprint_redux']
 		]);
-
 		echo json_encode($_POST);
-
-		#echo 'Running import script '.IMPORTSCRIPT.PHP_EOL;
-		#ob_start();
-		#passthru(IMPORTSCRIPT);
-		#$output = ob_get_clean();
-		#echo $output;
-#		$output = shell_exec(IMPORTSCRIPT);
 		break;
+
 		case 'show':
 			$nosho = ['file_sha1', 'configuration'];
 			$columns = $database->query("DESCRIBE songs")->fetchAll();
@@ -70,20 +64,21 @@ switch ($_GET['action']) {
 				);
 			}
 			echo json_encode($out,JSON_UNESCAPED_UNICODE);
-				break;
+			break;
 
 			case 'remove':
 				echo json_encode($_POST['del']);
 				#$database->query("DELETE from configurations WHERE id IN(" . implode(',', array_values($_POST['del'])) . ")");
 			break;
+
 			case 'update':
 				$database->insert("states", [
 					"date" => time(),
 					"active" => $_POST['active'],
 				]);
 			break;
-			case 'folders':
 
+			case 'folders':
 			$columns = $database->query("DESCRIBE configurations")->fetchAll();
 			$active = $database->query("SELECT active FROM states ORDER BY id DESC")->fetch();
 			$configs = $database->select("configurations", "*");
@@ -98,6 +93,36 @@ switch ($_GET['action']) {
 			}
 			echo json_encode($c,JSON_UNESCAPED_UNICODE);
 			break;
+
+			case 'sessions':
+				$columns = $database->query("DESCRIBE sessions")->fetchAll();
+				$sessions = $database->select("sessions", "*", ['ORDER' => 'id DESC', 'LIMIT' => 5]);
+				foreach ($columns as $i => $col) {
+					if (!in_array($col[0], $nosho))
+								$out['columns'][] = $col[0];
+				}
+
+				foreach ($sessions as $session) {
+						$out['rows'][] = $session;
+				}
+
+				echo json_encode($out,JSON_UNESCAPED_UNICODE);
+			break;
+
+
+			case 'events':
+				$columns = $database->query("DESCRIBE eventlog")->fetchAll();
+				$sessions = $database->select("eventlog", "*", ['session' => $_POST['id']]);
+				foreach ($columns as $i => $col) {
+					if (!in_array($col[0], $nosho))
+								$out['columns'][] = $col[0];
+				}
+				foreach ($sessions as $session) {
+						$out['rows'][] = $session;
+				}
+				echo json_encode($out,JSON_UNESCAPED_UNICODE);
+			break;
+
 			default:
 			break;
 }
